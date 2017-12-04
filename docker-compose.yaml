@@ -1,0 +1,58 @@
+version: "3.3"
+
+services:
+  
+  mysql-master:
+    image: mysql:${TAG}
+    container_name: mysql-master
+    restart: unless-stopped
+    env_file:
+      - env/base.env
+      - env/master.env
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MASTER_MYSQL_ROOT_PASSWORD}
+    ports:
+      - "3306:3306"
+    expose:
+      - "3306"
+    volumes:
+      - mysql-master-data:/var/lib/mysql
+      - ./init-db-sql/sakila-schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
+      - ./init-db-sql/sakila-data.sql:/docker-entrypoint-initdb.d/2-data.sql
+      - ./init-db-sql/init-master.sh:/docker-entrypoint-initdb.d/3-init-master.sh
+    command: [
+      "--log-bin=mysql-bin",
+      "--server-id=${MASTER_SERVER_ID}",
+      "--character-set-server=utf8mb4",
+      "--collation-server=utf8mb4_unicode_ci",
+      "--innodb_flush_log_at_trx_commit=1",
+      "--sync_binlog=1"
+      ]
+
+  mysql-node-1:
+    image: mysql:${TAG}
+    container_name: mysql-node-1
+    restart: unless-stopped
+    env_file:
+      - env/node.env
+    environment:
+      - MYSQL_ROOT_PASSWORD=${NODE_MYSQL_ROOT_PASSWORD}
+      - MASTER_MYSQL_ROOT_PASSWORD=${MASTER_MYSQL_ROOT_PASSWORD}
+    expose:
+      - "3306"
+    depends_on:
+      - mysql-master
+    volumes:
+      - mysql-node-1-data:/var/lib/mysql
+      - ./init-db-sql/sakila-schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
+      - ./init-db-sql/sakila-data.sql:/docker-entrypoint-initdb.d/2-data.sql
+      - ./init-db-sql/init-node.sh:/docker-entrypoint-initdb.d/3-init-node.sh
+    command: [
+      "--server-id=${NODE_1_SERVER_ID}",
+      "--character-set-server=utf8mb4",
+      "--collation-server=utf8mb4_unicode_ci",
+      ]
+
+volumes:
+  mysql-master-data:
+  mysql-node-1-data:
