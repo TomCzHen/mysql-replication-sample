@@ -2,7 +2,7 @@ version: "3.3"
 
 services:
   
-  mysql-master:
+  mysql-master: &mysql
     image: mysql:${TAG}
     container_name: mysql-master
     restart: unless-stopped
@@ -29,18 +29,14 @@ services:
       "--sync_binlog=1"
       ]
 
-  mysql-node-1:
-    image: mysql:${TAG}
+  mysql-node-1: &mysql-node
+    <<: *mysql
     container_name: mysql-node-1
-    restart: unless-stopped
-    env_file:
-      - env/base.env
-      - env/node.env
     environment:
       - MYSQL_ROOT_PASSWORD=${NODE_MYSQL_ROOT_PASSWORD}
       - MASTER_MYSQL_ROOT_PASSWORD=${MASTER_MYSQL_ROOT_PASSWORD}
-    expose:
-      - "3306"
+    ports:
+      - "3307:3306"
     depends_on:
       - mysql-master
     volumes:
@@ -53,7 +49,25 @@ services:
       "--character-set-server=utf8mb4",
       "--collation-server=utf8mb4_unicode_ci",
       ]
+  
+  mysql-node-2:
+    <<: *mysql-node
+    container_name: mysql-node-2
+    ports:
+      - "3308:3306"
+    volumes: 
+      - mysql-node-2-data:/var/lib/mysql
+      - ./init-db-sql/sakila-schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
+      - ./init-db-sql/sakila-data.sql:/docker-entrypoint-initdb.d/2-data.sql
+      - ./init-db-sql/init-node.sh:/docker-entrypoint-initdb.d/3-init-node.sh
+    command: [
+      "--server-id=${NODE_2_SERVER_ID}",
+      "--character-set-server=utf8mb4",
+      "--collation-server=utf8mb4_unicode_ci",
+      ]
+    
 
 volumes:
   mysql-master-data:
   mysql-node-1-data:
+  mysql-node-2-data:
