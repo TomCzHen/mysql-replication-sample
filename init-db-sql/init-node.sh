@@ -9,6 +9,14 @@ until MYSQL_PWD=${MASTER_MYSQL_ROOT_PASSWORD} mysql -u root -h mysql-master ; do
   sleep 3
 done
 
+# create replication user
+
+mysql_net=$(ip route | awk '$1=="default" {print $3}' | sed "s/\.[0-9]$/.%/g")
+
+MYSQL_PWD=${MYSQL_ROOT_PASSWORD} mysql -u root \
+-e "CREATE USER '${MYSQL_REPLICATION_USER}'@'${mysql_net}' IDENTIFIED BY '${MYSQL_REPLICATION_PASSWORD}'; \
+GRANT REPLICATION SLAVE ON *.* TO '${MYSQL_REPLICATION_USER}'@'${mysql_net}';"
+
 # get master log File & Position
 
 master_status_info=$(MYSQL_PWD=${MASTER_MYSQL_ROOT_PASSWORD} mysql -u root -h mysql-master -e "show master status\G")
@@ -26,4 +34,5 @@ MASTER_LOG_FILE='${LOG_FILE}', \
 MASTER_LOG_POS=${LOG_POS};"
 
 # start slave and show slave status
+
 MYSQL_PWD=${MYSQL_ROOT_PASSWORD} mysql -u root -e "START SLAVE;show slave status\G"
