@@ -32,9 +32,6 @@ services:
   mysql-node-1: &mysql-node
     <<: *mysql
     container_name: mysql-node-1
-    env_file:
-      - env/base.env
-      - env/node.env
     environment:
       - MYSQL_ROOT_PASSWORD=${NODE_MYSQL_ROOT_PASSWORD}
       - MASTER_MYSQL_ROOT_PASSWORD=${MASTER_MYSQL_ROOT_PASSWORD}
