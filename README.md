@@ -132,6 +132,8 @@ volumes:
 
 基础镜像会在初始化(仅首次运行)时按文件名顺序执行 `/docker-entrypoint-initdb.d` 下的 `.sql` `.sh` 等文件，详细信息可以查看镜像说明页面：
 
+https://hub.docker.com/_/mysql/
+
 > Initializing a fresh instance
 
 > When a container is started for the first time, a new database with the specified name will be created and initialized with the provided configuration variables. Furthermore, it will execute files with extensions `.sh`, `.sql` and `.sql.gz` that are found in `/docker-entrypoint-initdb.d`. Files will be executed in alphabetical order. You can easily populate your mysql services by mounting a SQL dump into that directory and provide custom images with contributed data. SQL files will be imported by default to the database specified by the `MYSQL_DATABASE` variable.
@@ -154,6 +156,8 @@ volumes:
 ```
 
 使用执行参数可以不依靠 `my.cnf` 对实例进行配置，详细资料可以查看镜像说明页面：
+
+https://hub.docker.com/_/mysql/
 
 > Configuration without a cnf file
 > Many configuration options can be passed as flags to `mysqld`. This will give you the flexibility to customize the container without needing a `cnf` file. For example, if you want to change the default encoding and collation for all tables to use UTF-8 (utf8mb4) just run the following:
