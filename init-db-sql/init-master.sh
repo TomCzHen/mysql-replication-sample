@@ -9,7 +9,3 @@ mysql_net=$(ip route | awk '$1=="default" {print $3}' | sed "s/\.[0-9]\+$/.%/g")
 MYSQL_PWD=${MYSQL_ROOT_PASSWORD} mysql -u root \
 -e "CREATE USER '${MYSQL_REPLICATION_USER}'@'${mysql_net}' IDENTIFIED BY '${MYSQL_REPLICATION_PASSWORD}'; \
 GRANT REPLICATION SLAVE ON *.* TO '${MYSQL_REPLICATION_USER}'@'${mysql_net}';"
-
-# grant replication user
-
-# MYSQL_PWD=${MYSQL_ROOT_PASSWORD} mysql -u root -e "GRANT REPLICATION SLAVE ON *.* TO '${MYSQL_REPLICATION_USER}'@'mysql-node-1';"
