@@ -6,12 +6,12 @@ set -e
 
 until MYSQL_PWD=${MASTER_MYSQL_ROOT_PASSWORD} mysql -u root -h mysql-master ; do
   >&2 echo "MySQL master is unavailable - sleeping"
-  sleep 3
+  sleep 5
 done
 
 # create replication user
 
-mysql_net=$(ip route | awk '$1=="default" {print $3}' | sed "s/\.[0-9]\+$/.%/g")
+mysql_net=$(hostname -i | sed "s/\.[0-9]\+$/.%/g")
 
 MYSQL_PWD=${MYSQL_ROOT_PASSWORD} mysql -u root \
 -e "CREATE USER '${MYSQL_REPLICATION_USER}'@'${mysql_net}' IDENTIFIED BY '${MYSQL_REPLICATION_PASSWORD}'; \
@@ -31,7 +31,8 @@ MYSQL_PWD=${MYSQL_ROOT_PASSWORD} mysql -u root \
 MASTER_USER='${MYSQL_REPLICATION_USER}', \
 MASTER_PASSWORD='${MYSQL_REPLICATION_PASSWORD}', \
 MASTER_LOG_FILE='${LOG_FILE}', \
-MASTER_LOG_POS=${LOG_POS};"
+MASTER_LOG_POS=${LOG_POS}, \
+GET_MASTER_PUBLIC_KEY=1;"
 
 # start slave and show slave status
 
